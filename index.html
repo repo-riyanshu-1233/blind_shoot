@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Play Blind Shot, a cartoon arena survival game with tactical aiming, AI opponents, online-style matchmaking, private rooms, and fast reaction showdowns.">
+<meta name="keywords" content="Blind Shot, arena survival game, browser game, cartoon shooter, AI battle game, multiplayer arena, reaction game, duck game">
+<meta name="robots" content="index,follow">
+<meta name="author" content="Blind Shot">
+<meta name="theme-color" content="#062420">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Blind Shot — Arena Survival">
+<meta property="og:description" content="Aim smart, survive the arena, and win the final showdown in Blind Shot.">
+<meta property="og:site_name" content="Blind Shot">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='24' fill='%2338d9a9'/%3E%3Cellipse cx='50' cy='55' rx='27' ry='31' fill='%23fff5e6' stroke='%23111916' stroke-width='5'/%3E%3Cellipse cx='40' cy='44' rx='7' ry='10' fill='white' stroke='%23111916' stroke-width='3'/%3E%3Cellipse cx='61' cy='44' rx='7' ry='10' fill='white' stroke='%23111916' stroke-width='3'/%3E%3Ccircle cx='41' cy='45' r='3'/%3E%3Ccircle cx='60' cy='45' r='3'/%3E%3Cpath d='M39 55 Q50 48 62 55 Q60 69 50 69 Q40 68 39 55' fill='%23ff9b42' stroke='%23111916' stroke-width='3'/%3E%3C/svg%3E">
+<title>Blind Shot — Arena Survival Game</title>
+<link href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<canvas id="bgCanvas"></canvas><canvas id="fxCanvas"></canvas>
+
+<section id="menuScreen" class="screen active">
+  <button id="hamburgerBtn" class="hamburger" aria-label="Open menu">☰</button>
+  <div class="menu-shell">
+    <svg class="duck-hero" viewBox="0 0 180 190" role="img" aria-label="Blind Shot duck mascot">
+      <ellipse cx="91" cy="174" rx="54" ry="8" fill="#00110e" opacity=".45"/>
+      <path d="M47 164 C35 143 37 111 43 81 C48 48 68 26 91 28 C117 29 134 54 135 87 L139 142 C139 158 124 168 103 169 Z" fill="#f8f4f1" stroke="#141411" stroke-width="6" stroke-linejoin="round"/>
+      <path d="M58 130 C43 139 47 155 69 160 C88 165 102 151 105 143 C119 157 139 150 137 137 C135 125 116 121 103 128 C86 115 70 118 58 130Z" fill="#d9d0df" stroke="#141411" stroke-width="5" stroke-linejoin="round"/>
+      <path d="M63 121 C75 134 91 139 107 133 C119 129 127 137 122 145 C113 159 86 155 68 143 C55 135 54 126 63 121Z" fill="#faf7f4" stroke="#141411" stroke-width="5" stroke-linejoin="round"/>
+      <path d="M66 36 C72 17 85 6 96 10 C104 13 94 25 85 37Z" fill="#fffaf7" stroke="#141411" stroke-width="5" stroke-linejoin="round"/>
+      <ellipse cx="60" cy="72" rx="18" ry="25" fill="#fff" stroke="#141411" stroke-width="5" transform="rotate(-14 60 72)"/>
+      <ellipse cx="117" cy="72" rx="17" ry="24" fill="#fff" stroke="#141411" stroke-width="5" transform="rotate(12 117 72)"/>
+      <ellipse cx="64" cy="70" rx="5" ry="8" fill="#151411"/><ellipse cx="113" cy="70" rx="5" ry="8" fill="#151411"/>
+      <circle cx="62" cy="67" r="2" fill="#fff"/><circle cx="111" cy="67" r="2" fill="#fff"/>
+      <path d="M76 79 C65 80 57 89 59 99 C61 111 75 119 91 118 C107 118 121 110 123 99 C125 88 114 81 103 79 C95 76 84 76 76 79Z" fill="#ff9b42" stroke="#141411" stroke-width="5" stroke-linejoin="round"/>
+      <path d="M83 83 C87 80 95 80 99 83" fill="none" stroke="#ffd09a" stroke-width="5" stroke-linecap="round"/>
+      <path d="M44 103 C38 119 41 136 52 145 L65 149 L58 124Z" fill="#fffaf7"/>
+    </svg>
+    <h1 class="logo">BLIND <span>SHOT</span></h1>
+    <p class="tagline">ARENA SURVIVAL. CARTOON CHAOS.</p>
+    <div class="menu-buttons">
+      <button id="playBtn" class="menu-btn primary">PLAY</button>
+      <button id="onlineBtn" class="menu-btn online-green">ONLINE MODE</button>
+      <button id="hostBtn" class="menu-btn">HOST GAME</button>
+      <button id="joinBtn" class="menu-btn">JOIN ROOM</button>
+    </div>
+    <div id="onlinePanel" class="menu-panel">
+      <div class="section-card">
+        <button type="button" class="section-back" id="backOnlineBtn">BACK</button>
+        <h3 class="panel-title">FIND A GAME</h3>
+        <label class="field-label" for="onlineName">Your name</label>
+        <input id="onlineName" class="text-input" maxlength="18" placeholder="Enter your name" autocomplete="nickname">
+        <button id="findGameBtn" class="menu-btn online-green">FIND GAME</button>
+      </div>
+    </div>
+    <div id="hostPanel" class="menu-panel">
+      <div class="section-card">
+        <button type="button" class="section-back" id="backHostBtn">BACK</button>
+        <h3 class="panel-title">HOST GAME</h3>
+        <label class="field-label" for="hostName">Your name</label>
+        <input id="hostName" class="text-input" maxlength="18" placeholder="Enter your name" autocomplete="nickname">
+        <button id="createRoomBtn" class="menu-btn">CREATE ROOM</button>
+      </div>
+    </div>
+    <div id="joinPanel" class="menu-panel">
+      <div class="section-card">
+        <button type="button" class="section-back" id="backJoinBtn">BACK</button>
+        <h3 class="panel-title">JOIN ROOM</h3>
+        <label class="field-label" for="joinName">Your name</label>
+        <input id="joinName" class="text-input" maxlength="18" placeholder="Enter your name" autocomplete="nickname">
+        <label class="field-label" for="joinCode">Room code</label>
+        <input id="joinCode" class="text-input" inputmode="numeric" maxlength="5" placeholder="12345" autocomplete="off">
+        <button id="connectRoomBtn" class="menu-btn online-green">JOIN ROOM</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="lobbyScreen" class="screen">
+ <div class="lobby-card">
+   <div class="lobby-heading"><h2 id="lobbyTitle">ROOM LOBBY</h2><div id="roomCodeBox" class="room-code" style="display:none">-----</div></div>
+   <p id="lobbyStatus" class="lobby-status">Setting up the lobby…</p>
+   <div id="roster" class="roster"></div>
+   <p id="lobbyHint" class="hint"></p>
+   <div id="lobbyCountdown" class="lobby-countdown"></div>
+   <div class="lobby-actions">
+     <button id="shareRoomBtn" class="cartoon-btn gold" style="display:none">SHARE ROOM CODE</button>
+     <button id="startRoomBtn" class="cartoon-btn green" style="display:none">START GAME</button>
+     <button id="cancelLobbyBtn" class="cartoon-btn">MAIN MENU</button>
+   </div>
+ </div>
+</section>
+
+<section id="gameScreen" class="screen">
+  <div id="leftZone" class="side-zone" aria-label="Movement control">
+    <aside id="shotRevealPanel" class="side-info-card shot-reveal-card" aria-live="polite">
+      <div class="side-panel-heading">SHOT TARGETS</div>
+      <div id="shotRevealList" class="shot-reveal-list"></div>
+    </aside>
+  </div>
+  <div class="game-center">
+    <canvas id="gameCanvas" width="800" height="800" aria-label="Blind Shot game arena"></canvas>
+    <div class="game-topbar">
+      <div class="game-top-left"><button id="exitGameBtn" class="icon-btn" aria-label="Exit to main menu" title="Exit">↩</button><div id="roundHud" class="hud-pill">ROUND 1</div></div>
+      <div class="game-top-right"><div id="statusHud" class="hud-pill">READY</div></div>
+    </div>
+    <button id="showdownBtn" class="cartoon-btn red">WAIT…</button>
+    <div id="deathOverlay" class="overlay-card" style="display:none">
+      <h2>YOU'RE OUT!</h2><p id="deathMessage">Your run has ended.</p>
+      <div class="overlay-stats"><div class="stat-pill">KILLS: <b id="deathKills">0</b></div><div class="stat-pill">ROUND: <b id="deathRound">1</b></div></div>
+      <div class="overlay-actions"><button id="deathMenuBtn" class="cartoon-btn">MAIN MENU</button><button id="spectateBtn" class="cartoon-btn green">SPECTATOR MODE</button></div>
+    </div>
+    <div id="resultOverlay" class="overlay-card" style="display:none">
+      <h2 id="resultTitle">PLAYER WINS!</h2><p id="resultMessage">Match complete.</p>
+      <div class="overlay-stats"><div class="stat-pill">WINNER: <b id="resultWinner">—</b></div><div class="stat-pill">YOUR KILLS: <b id="resultKills">0</b></div></div>
+      <div class="overlay-actions"><button id="resultMenuBtn" class="cartoon-btn">MAIN MENU</button><button id="shareResultBtn" class="cartoon-btn green">SHARE RESULT</button></div>
+      <p id="resultExtra" class="mini-note">Thanks for playing Blind Shot!</p>
+    </div>
+  </div>
+  <div id="rightZone" class="side-zone" aria-label="Aim control">
+    <aside class="side-info-card battle-feed-card" aria-live="polite">
+      <div class="side-panel-heading">BATTLE FEED</div>
+      <div id="killFeed" class="kill-feed"></div>
+    </aside>
+  </div>
+</section>
+
+<div id="rotateOverlay" class="rotate-overlay"><div class="rotate-icon">📱</div><h2>ROTATE TO PLAY</h2><p>LANDSCAPE MODE REQUIRED</p><button id="rotateContinueBtn" class="cartoon-btn green" style="margin-top:18px">CONTINUE</button></div>
+<div id="modalBackdrop" class="modal-backdrop"><div class="modal"><h2 id="modalTitle">ABOUT BLIND SHOT</h2><div id="modalBody"></div><div class="modal-actions"><button id="modalCloseBtn" class="cartoon-btn green">CLOSE</button></div></div></div>
+<div id="toast" class="toast"></div>
+<div id="constructionBackdrop" class="construction-backdrop" aria-hidden="true"><div id="constructionNotice" role="status" aria-live="polite"><span>UNDER CONSTRUCTION</span><button type="button" id="closeConstructionNotice" aria-label="Dismiss notice">×</button></div></div>
+<div id="maintenanceScreen"><div class="maintenance-card"><h1 style="font-family:'Luckiest Guy',cursive;color:var(--gold)">BLIND SHOT</h1><h2>WE'LL BE BACK SOON</h2><p>We're making the arena better. Please check back shortly.</p></div></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/nipplejs/0.10.1/nipplejs.min.js"></script>
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
