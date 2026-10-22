@@ -1,6 +1,5 @@
 'use strict';
 
-// -------------------- DOM --------------------
 const $ = (id) => document.getElementById(id);
 const menuScreen=$('menuScreen'), lobbyScreen=$('lobbyScreen'), gameScreen=$('gameScreen');
 const bgCanvas=$('bgCanvas'), bgCtx=bgCanvas.getContext('2d');
@@ -10,17 +9,15 @@ const killFeed=$('killFeed'), shotRevealPanel=$('shotRevealPanel'), shotRevealLi
 const deathOverlay=$('deathOverlay'), resultOverlay=$('resultOverlay'), toastEl=$('toast');
 const onlinePanel=$('onlinePanel'), hostPanel=$('hostPanel'), joinPanel=$('joinPanel');
 const mobileDevice = (matchMedia('(pointer: coarse)').matches || navigator.maxTouchPoints>0);
-// ===== OWNER SETTINGS: change these true/false values whenever needed =====
-const MAINTENANCE_MODE = false;                 // true = block gameplay and show maintenance screen
-const SHOW_UNDER_CONSTRUCTION_NOTICE = true;     // true = show the short notice on page load
-const PERMANENTLY_DISABLE_CONSTRUCTION_NOTICE = false; // true = never show the notice
+const MAINTENANCE_MODE = true;                 
+const SHOW_UNDER_CONSTRUCTION_NOTICE = true;     
+const PERMANENTLY_DISABLE_CONSTRUCTION_NOTICE = false; 
 const UNDER_CONSTRUCTION_NOTICE_DURATION_MS = 5000;
 const CONTACT_EMAIL = 'riyanshusinh@gmail.com';
 const INSTAGRAM_URL = 'https://www.instagram.com/riyanshu_1233/';
-const OTHER_GAMES_URL = ''; // Add your future games URL here, e.g. 'https://example.com/games'
+const OTHER_GAMES_URL = 'https://arcade-edition.onrender.com/'; 
 
 
-// -------------------- Background / effects --------------------
 let bgW=0,bgH=0; const bgParticles=[]; const bgShapes=['O','X','•','✦'];
 function resizeCanvases(){
   bgW=bgCanvas.width=window.innerWidth; bgH=bgCanvas.height=window.innerHeight;
@@ -36,7 +33,6 @@ function spawnHitBlast(x,y,color='#fca311'){const colors=[color,'#ffd166','#fff5
 function updateHitBlasts(dt){for(const b of explosions){b.x+=b.vx*dt;b.y+=b.vy*dt;b.vx*=Math.pow(.90,dt*60);b.vy=b.vy*.985+65*dt;b.life-=dt;}explosions=explosions.filter(b=>b.life>0);}
 function drawHitBlasts(){if(!explosions.length)return;ctx.save();for(const b of explosions){const alpha=Math.max(0,Math.min(1,b.life/b.maxLife));ctx.globalAlpha=alpha;ctx.fillStyle=b.color;ctx.beginPath();ctx.arc(b.x,b.y,b.size*(.55+alpha*.65),0,Math.PI*2);ctx.fill();}ctx.globalAlpha=1;ctx.restore();}
 
-// -------------------- General app state --------------------
 let currentScreen='menu', mode='solo', gameState='MENU', stateTimer=0, roundNumber=1, arenaSize=750;
 let entities=[], localPlayerId='local-player', hostPlayerId='', winnerId=null, winnerName='', pendingHits=[], shots=[], scoutPerk=null, tiles=[], safeTileColor='GOLD', explosions=[];
 let isAuthority=true, isNetworkClient=false, isRoomHost=false, isSpectating=false, localDeathSeen=false, gameResultShown=false, fastTapSent=false;
@@ -105,7 +101,6 @@ window.addEventListener('keydown',e=>{
 $('backOnlineBtn').addEventListener('click',closeModePanel);$('backHostBtn').addEventListener('click',closeModePanel);$('backJoinBtn').addEventListener('click',closeModePanel);
 function setModeForms(){closeModePanel();}
 
-// -------------------- Main menu / information drawer --------------------
 $('playBtn').addEventListener('click',()=>{setModeForms();localName='Player';startSoloMatch();});
 $('onlineBtn').addEventListener('click',()=>togglePanel('online'));
 $('hostBtn').addEventListener('click',()=>togglePanel('host'));
@@ -134,34 +129,30 @@ function closeModal(){
  setTimeout(()=>{modal.classList.remove('closing');},260);
 }
 
-// -------------------- Orientation / fullscreen --------------------
 function isPortrait(){return window.innerHeight>window.innerWidth;}
 function syncRotateOverlay(){const should=currentScreen==='game'&&mobileDevice&&isPortrait();rotateOverlay.classList.toggle('active',should);}
 let joystickRelayoutTimer=0;
 function handleOrientationChange(){syncRotateOverlay();if(rotatePendingStart&&!isPortrait()){const start=rotatePendingStart;rotatePendingStart=null;start();}if(currentScreen==='game'&&mobileDevice){clearTimeout(joystickRelayoutTimer);joystickRelayoutTimer=setTimeout(()=>{if(currentScreen==='game'){destroyJoysticks();initJoysticks();}},220);}}
 window.addEventListener('resize',handleOrientationChange);window.addEventListener('orientationchange',()=>setTimeout(handleOrientationChange,150));document.addEventListener('fullscreenchange',()=>setTimeout(handleOrientationChange,180));document.addEventListener('webkitfullscreenchange',()=>setTimeout(handleOrientationChange,180));
-function requestLandscape(){if(!mobileDevice)return;try{const root=document.documentElement;let p=null;if(root.requestFullscreen)p=root.requestFullscreen();else if(root.webkitRequestFullscreen)p=root.webkitRequestFullscreen();if(p&&typeof p.then==='function'){p.then(()=>{try{screen.orientation?.lock?.('landscape').catch(()=>{});}catch(_){}}).catch(()=>{});}else{try{screen.orientation?.lock?.('landscape').catch(()=>{});}catch(_){}}}catch(_){}}
+function requestLandscape(){if(!mobileDevice)return;try{const root=document.documentElement;let p=null;if(root.requestFullscreen)p=root.requestFullscreen();else if(root.webkitRequestFullscreen)p=root.webkitRequestFullscreen();if(p&&typeof p.then==='function'){p.then(()=>{try{screen.orientation?.lock?.('landscape').catch(()=>{});}catch(_){}}).catch(()=>{});}else{try{screen.orientation?.lock?.('landscape').catch(()=>{});}catch(_}{}}}catch(_){}}
 function leaveLandscape(){try{screen.orientation?.unlock?.();}catch(_){}try{if(document.fullscreenElement&&document.exitFullscreen)document.exitFullscreen().catch(()=>{});else if(document.webkitFullscreenElement&&document.webkitExitFullscreen)document.webkitExitFullscreen();}catch(_){} }
 $('rotateContinueBtn').addEventListener('click',()=>{requestLandscape();handleOrientationChange();if(!isPortrait())rotateOverlay.classList.remove('active');else showToast('Turn your phone sideways to continue.');});
 
-// -------------------- Joysticks and input --------------------
 function initJoysticks(){if(!mobileDevice||joysticksReady||typeof nipplejs==='undefined')return;try{moveNipple=nipplejs.create({zone:$('leftZone'),mode:'static',position:{left:'50%',bottom:'78px'},color:'white',restOpacity:.52,size:112});aimNipple=nipplejs.create({zone:$('rightZone'),mode:'static',position:{left:'50%',bottom:'78px'},color:'#ff6b6b',restOpacity:.52,size:112});moveNipple.on('move',(e,d)=>{moveJoy.x=d.vector.x||0;moveJoy.y=-(d.vector.y||0);moveJoy.force=Math.min(1,(d.force||0));});moveNipple.on('end',()=>{moveJoy={x:0,y:0,force:0};});aimNipple.on('move',(e,d)=>{aimJoy.x=d.vector.x||0;aimJoy.y=-(d.vector.y||0);aimingByTouch=true;});aimNipple.on('end',()=>{aimingByTouch=false;});joysticksReady=true;}catch(err){console.warn('Joystick init failed',err);showToast('Joystick library failed to load. Use keyboard/mouse if available.');}}
-function destroyJoysticks(){if(moveNipple){try{moveNipple.destroy();}catch(_){}}if(aimNipple){try{aimNipple.destroy();}catch(_){}}moveNipple=aimNipple=null;joysticksReady=false;moveJoy={x:0,y:0,force:0};aimJoy={x:0,y:0};aimingByTouch=false;}
+function destroyJoysticks(){if(moveNipple){try{moveNipple.destroy();}catch(_}{}}if(aimNipple){try{aimNipple.destroy();}catch(_}{}}moveNipple=aimNipple=null;joysticksReady=false;moveJoy={x:0,y:0,force:0};aimJoy={x:0,y:0};aimingByTouch=false;}
 function getLocalInput(){let dx=(keys.d||keys.arrowright?1:0)-(keys.a||keys.arrowleft?1:0);let dy=(keys.s||keys.arrowdown?1:0)-(keys.w||keys.arrowup?1:0);let force=1;if(mobileDevice&&(moveJoy.x!==0||moveJoy.y!==0)){dx=moveJoy.x;dy=moveJoy.y;force=moveJoy.force||1;}let ent=entities.find(e=>e.id===localPlayerId);let ang=ent?ent.angle:0;if(mobileDevice&&aimingByTouch){ang=Math.atan2(aimJoy.y,aimJoy.x);}else if(mouseHasMoved&&ent){ang=Math.atan2(mouseY-ent.y,mouseX-ent.x);}return{moveX:dx,moveY:dy,force,angle:ang};}
 window.addEventListener('keydown',e=>{const k=e.key.toLowerCase();if(k in keys){keys[k]=true;if(currentScreen==='game')e.preventDefault();}});window.addEventListener('keyup',e=>{const k=e.key.toLowerCase();if(k in keys)keys[k]=false;});
 canvas.addEventListener('mousemove',e=>{const r=canvas.getBoundingClientRect();mouseX=(e.clientX-r.left)*(canvas.width/r.width);mouseY=(e.clientY-r.top)*(canvas.height/r.height);mouseHasMoved=true;});
 
-// -------------------- Lobby rendering --------------------
 function renderRoster(players,online=false){const host=$('roster');host.innerHTML='';players.slice(0,11).forEach(p=>{const row=document.createElement('div');row.className='roster-item';const dot=document.createElement('span');dot.className='avatar-dot';dot.style.background=p.isHost?'var(--gold)':p.isBot?'#fca311':'var(--mint)';const name=document.createElement('span');name.className='roster-name';name.textContent=p.name;if(!online){const tag=document.createElement('span');tag.className='roster-tag';tag.textContent=p.isHost?'HOST':p.isBot?'AI BOT':'PLAYER';name.appendChild(tag);}row.append(dot,name);host.appendChild(row);});}
 function showLobby({title,status,players=[],code='',host=false,online=false}){setScreen('lobby');$('lobbyTitle').textContent=title;$('lobbyStatus').textContent=status;$('lobbyHint').textContent='';renderRoster(players,online);$('roomCodeBox').style.display=code?'block':'none';$('roomCodeBox').textContent=code||'';$('shareRoomBtn').style.display=code?'inline-block':'none';$('startRoomBtn').style.display=host?'inline-block':'none';$('lobbyCountdown').textContent='';}
 function buildHostLobbyRoster(){return [{name:localName,isHost:true},...Array.from(remoteUsers.values()).map(p=>({name:p.name,isHost:false}))].slice(0,10);}
 function updateRoomLobby(){const players=buildHostLobbyRoster();showLobby({title:'HOST GAME',status:peerReady?`${players.length}/10 PLAYERS • EMPTY SLOTS FILL WITH BOTS`:'CONNECTING…',players,code:roomCode,host:peerReady});}
 function updateJoinLobby(players,status='ROOM CONNECTED'){showLobby({title:'JOINED ROOM',status,players,code:roomCode,host:false});$('shareRoomBtn').style.display='none';$('lobbyHint').textContent='';}
 $('cancelLobbyBtn').addEventListener('click',()=>exitToMenu(true));
-$('shareRoomBtn').addEventListener('click',async()=>{const txt=`Join my Blind Shot room! Code: ${roomCode}`;try{if(navigator.share)await navigator.share({title:'Blind Shot room',text:txt});else if(navigator.clipboard){await navigator.clipboard.writeText(txt);showToast('Room code copied.');}else showToast(txt,4500);}catch(_){showToast(`Room code: ${roomCode}`,4500);}});
+$('shareRoomBtn').addEventListener('click',async()=>{const txt=`Join my Blind Shot room! Code: ${roomCode}`;try{if(navigator.share)await navigator.share({title:'Blind Shot room',text:txt});else if(navigator.clipboard){await navigator.clipboard.writeText(txt);showToast('Room code copied.');}else showToast(txt,4505);}catch(_){showToast(`Room code: ${roomCode}`,4505);}});
 $('startRoomBtn').addEventListener('click',()=>{if(!isRoomHost||!peerReady)return;startRoomMatch();});
 
-// -------------------- Online mode (AI lobby) --------------------
 function startOnlineBotLobby(){
  const raw=($('onlineName').value||'').trim();
  if(!raw){showToast('Enter your name first.');$('onlineName').focus();return;}
@@ -171,7 +162,6 @@ function startOnlineBotLobby(){
  onlineRosterBotNames=[];
  for(let i=0;i<10;i++)onlineRosterBotNames.push(uniqueBotName(used));
  const queue=[{name:localName,isLocal:true,isBot:false},...onlineRosterBotNames.map(name=>({name,isBot:true}))];
- // Shuffle arrival order so the local name can appear early or arrive last, like matchmaking.
  for(let i=queue.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[queue[i],queue[j]]=[queue[j],queue[i]];}
  let shown=[];let index=0;
  showLobby({title:'FINDING PLAYERS',status:'Finding a match…',players:[],online:true});
@@ -196,7 +186,6 @@ function startOnlineBotLobby(){
  lobbyTimer=setTimeout(arriveNext,350+Math.random()*650);
 }
 
-// -------------------- PeerJS host / join --------------------
 function peerAvailable(){if(typeof Peer==='undefined'){showToast('PeerJS could not load. Check your internet connection and reload.');return false;}return true;}
 function createRoom(){roomBotNames=[];if(!($('hostName').value||'').trim()){showToast('Enter your name first.');$('hostName').focus();return;}const name=safeName($('hostName').value);localName=name;if(!peerAvailable())return;destroyPeer(false);mode='host';isRoomHost=true;isNetworkClient=false;isAuthority=true;hostCreating=true;peerReady=false;remoteConnections.clear();remoteUsers.clear();let attempts=0;showLobby({title:'HOST GAME',status:'Requesting a room code…',players:[{name:localName,isHost:true}],host:false});
  const tryCreate=()=>{attempts++;roomCode=String(Math.floor(10000+Math.random()*90000));try{peer=new Peer(`blindshot-${roomCode}`);}catch(err){$('lobbyStatus').textContent='Could not create PeerJS connection.';showToast('Unable to create room.');return;}
@@ -217,7 +206,6 @@ function handleClientMessage(msg){if(!msg||typeof msg!=='object')return;if(msg.t
 function startRoomMatch(){if(!isRoomHost||!peerReady)return;clearTimeout(lobbyTimer);clearInterval(lobbyTimer);const humans=[{id:hostPlayerId,name:localName,isLocal:true,isHost:true},...Array.from(remoteUsers.values()).map(p=>({id:p.id,name:p.name,isLocal:false,isHost:false}))].slice(0,10);roomBotNames=[];for(let i=1;i<=10-humans.length;i++)roomBotNames.push(`BOT ${i}`);beginAuthoritativeMatch('host',humans,5);}
 function destroyPeer(sendLeave=true){if(sendLeave&&hostConn&&hostConn.open){try{hostConn.send({type:'leave'});}catch(_){}}if(isRoomHost){for(const c of remoteConnections.values()){if(c.open){try{c.send({type:'hostLeft'});}catch(_){}try{c.close();}catch(_){}}}}remoteConnections.clear();remoteUsers.clear();if(hostConn){try{hostConn.close();}catch(_){}hostConn=null;}if(peer){try{peer.destroy();}catch(_){}peer=null;}peerReady=false;isRoomHost=false;hostCreating=false;}
 
-// -------------------- Game entities / setup --------------------
 function clamp(n,min,max){return Math.max(min,Math.min(max,n));}
 function randomPosition(size=arenaSize){const r=size/2-35,a=Math.random()*Math.PI*2,d=Math.sqrt(Math.random())*r;return{x:400+Math.cos(a)*d,y:400+Math.sin(a)*d};}
 function createEntity({id,name,isBot=false,isLocal=false,isHost=false,color=null,x=null,y=null}){const pos=(x===null||y===null)?randomPosition():{x,y};return{id,name,x:pos.x,y:pos.y,radius:13,color:color||(isBot?'#fca311':isHost?'#ffd166':'#38d9a9'),angle:Math.random()*Math.PI*2,speed:isBot?160:280,alive:true,isBot,isLocal,isHost,kills:0,moveAnim:0,netMoveX:0,netMoveY:0,aiMoveAngle:Math.random()*Math.PI*2,aiThink:0,aimOffset:0,targetId:null,scoutTimer:0,tileSafe:false,fastTapped:false};}
@@ -230,9 +218,8 @@ function exitToMenu(closeNetwork=true){rotatePendingStart=null;clearTimeout(lobb
 $('exitGameBtn').addEventListener('click',()=>{if(mode==='host'&&isRoomHost&&remoteUsers.size>0){if(!confirm('Leaving will close this hosted room for everyone. Continue?'))return;}exitToMenu(true);});
 $('deathMenuBtn').addEventListener('click',()=>exitToMenu(true));$('spectateBtn').addEventListener('click',()=>{isSpectating=true;setOverlayVisible(deathOverlay,false);showToast('Spectator mode: you can watch the remaining fighters.');});
 $('resultMenuBtn').addEventListener('click',()=>exitToMenu(true));
-$('shareResultBtn').addEventListener('click',async()=>{const txt=winnerId?`${winnerName} won a Blind Shot match! I got ${entities.find(e=>e.id===localPlayerId)?.kills||0} kills. Play Blind Shot with me!`:'We got a draw in Blind Shot! Play with me!';const url=location.href;try{if(navigator.share)await navigator.share({title:'Blind Shot match result',text:txt,url});else if(navigator.clipboard){await navigator.clipboard.writeText(`${txt}\n${url}`);showToast('Result copied to clipboard.');}else showToast(txt,5000);}catch(_){showToast('Share cancelled.');}});
+$('shareResultBtn').addEventListener('click',async()=>{const txt=winnerId?`${winnerName} won a Blind Shot match! I got ${entities.find(e=>e.id===localPlayerId)?.kills||0} kills. Play Blind Shot with me!`:'We got a draw in Blind Shot! Play with me!';const url=location.href;try{if(navigator.share)await navigator.share({title:'Blind Shot match result',text:txt,url});else if(navigator.clipboard){await navigator.clipboard.writeText(`${txt}\n${url}`);showToast('Result copied to clipboard.');}else showToast(txt,5005);}catch(_){showToast('Share cancelled.');}});
 
-// -------------------- Time-based game state machine --------------------
 function setState(next,duration=0){gameState=next;stateTimer=duration;if(next==='EXECUTING')renderShotRevealPanel();else shotRevealPanel.classList.remove('active');if(next==='FIRING'){fireProgress=0;}if(next==='FAST_WAIT'){showdownBtn.style.display=aliveEntities().some(e=>e.id===localPlayerId)?'block':'none';showdownBtn.classList.remove('green');showdownBtn.classList.add('red');showdownBtn.disabled=true;showdownBtn.textContent='WAIT…';fastTapSent=false;}else if(next==='FAST_READY'){stateTimer=-1;showdownBtn.style.display=aliveEntities().some(e=>e.id===localPlayerId)?'block':'none';showdownBtn.classList.remove('red');showdownBtn.classList.add('green');showdownBtn.disabled=false;showdownBtn.textContent='TAP TO FIRE!';fastReadyAt=gameElapsed;fastBotAt=gameElapsed+(.35+Math.random()*.65);}else if(!next.startsWith('FAST_')){showdownBtn.style.display='none';}updateHud();}
 function fillHostBots(){if(mode!=='host'||!isAuthority)return;const used=new Set(entities.map(e=>e.name.toLowerCase()));let n=1;while(entities.length<10){let name=roomBotNames[n-1]||`BOT ${n}`;while(used.has(name.toLowerCase()))name=`BOT ${++n}`;used.add(name.toLowerCase());entities.push(createEntity({id:makeId('bot'),name,isBot:true,color:'#fca311'}));n++;}const placed=[];for(const e of entities){if(e.isBot){let pos,tries=0;do{pos=randomPosition(arenaSize);tries++;}while(placed.some(q=>Math.hypot(q.x-pos.x,q.y-pos.y)<48)&&tries<80);e.x=pos.x;e.y=pos.y;placed.push(pos);}}} 
 function beginRound(){pendingHits=[];shots=[];const living=aliveEntities();if(living.length<=1){finishMatch(living[0]||null);return;}if(living.length===2){startFastFinger();return;}if(roundNumber>12){beginTileRound();return;}scoutPerk=null;if(roundNumber>8){scoutPerk={...randomPosition(arenaSize),active:true};}aliveEntities().forEach(e=>{e.tileSafe=false;e.fastTapped=false;});setState('STARTING',3);addKillMessage(`ROUND ${roundNumber} — GET READY`);}
@@ -248,7 +235,6 @@ function updateBot(ent,dt,phase){
  if(!target||ent.aiThink<=0){
    const enemies=aliveEntities().filter(e=>e.id!==ent.id);
    if(!enemies.length)return;
-   // Prefer nearby opponents, but occasionally switch targets so bots do not all tunnel on one fighter.
    enemies.sort((a,b)=>Math.hypot(a.x-ent.x,a.y-ent.y)-Math.hypot(b.x-ent.x,b.y-ent.y));
    target=(Math.random()<.22&&enemies.length>1)?enemies[Math.floor(Math.random()*Math.min(4,enemies.length))]:enemies[0];
    ent.targetId=target.id;
@@ -260,20 +246,17 @@ function updateBot(ent,dt,phase){
  }
  const dx=target.x-ent.x,dy=target.y-ent.y,dist=Math.hypot(dx,dy),targetAngle=Math.atan2(dy,dx);
  if(phase==='AIMING'||phase==='STARTING'){
-   // Smoothly track a target with slight, stable inaccuracy instead of snapping or shaking.
    const aimTarget=targetAngle+(ent.aimOffset||0);
    const diff=Math.atan2(Math.sin(aimTarget-ent.angle),Math.cos(aimTarget-ent.angle));
    ent.angle+=clamp(diff,-dt*(1.7+Math.min(1.0,dist/260)),dt*(1.7+Math.min(1.0,dist/260)));
  }
  if(phase==='STARTING'||phase==='AIMING'){
-   // Strafe at medium range, approach long-range opponents, and retreat when crowded.
    let desired;
    if(dist<105) desired=targetAngle+Math.PI+(ent.aiStrafeSign||1)*.28;
    else if(dist>270) desired=targetAngle+(ent.aiStrafeSign||1)*.38;
    else desired=targetAngle+(ent.aiStrafeSign||1)*(Math.PI/2);
    const borderDist=Math.hypot(ent.x-400,ent.y-400),borderRatio=borderDist/Math.max(1,arenaSize/2);
    if(borderRatio>.78){const inward=Math.atan2(400-ent.y,400-ent.x);desired=inward+(Math.random()<.5?-.18:.18);}
-   // Repel from nearby fighters to reduce stacks and collisions.
    let repelX=0,repelY=0;
    for(const other of aliveEntities()){
      if(other.id===ent.id)continue;
@@ -317,7 +300,7 @@ function afterRoundReveal(){roundNumber++;arenaSize=Math.max(400,arenaSize-45);a
 function tickAuthority(dt){gameElapsed+=dt;if(gameState==='MENU'||gameState==='GAME_OVER')return;for(const e of entities){if(e.scoutTimer>0)e.scoutTimer=Math.max(0,e.scoutTimer-dt);}
  if(gameState==='STARTING'||gameState==='AIMING'){updateAllMovement(dt,gameState);}
  else if(gameState==='TILE_SURVIVAL'){updateAllMovement(dt,'TILE_SURVIVAL');processTileLocks();}
- if(gameState==='FAST_WAIT'||gameState==='FAST_READY'){/* reactions handled below */}
+ if(gameState==='FAST_WAIT'||gameState==='FAST_READY){}
  if(stateTimer>0)stateTimer=Math.max(0,stateTimer-dt);
  if(gameState==='MATCH_COUNTDOWN'&&stateTimer<=0){if(mode==='host')fillHostBots();beginRound();}
  else if(gameState==='STARTING'&&stateTimer<=0){beginAiming();}
@@ -334,16 +317,13 @@ function tickAuthority(dt){gameElapsed+=dt;if(gameState==='MENU'||gameState==='G
  else if(gameState==='FAST_SHOOT'){fireProgress=Math.min(1,fireProgress+dt/.32);if(stateTimer<=0){const loser=entities.find(e=>e.id===fastLoserId);if(loser)loser.alive=false;const win=entities.find(e=>e.id===winnerId);finishMatch(win||null);}}
  updateHud();}
 
-// -------------------- Colour tile survival (after round 12) --------------------
 function beginTileRound(){const alive=aliveEntities();if(alive.length<=2){handleLowPlayerCount();return;}tiles=[];alive.forEach(e=>e.tileSafe=false);const tileCount=Math.max(1,alive.length-1);safeTileColor=randomFrom(TILE_COLORS).name;let safeMade=0;for(let i=0;i<tileCount;i++){let colorName;if(i<tileCount){if(safeMade<tileCount){colorName=safeTileColor;safeMade++;}}const colorObj=TILE_COLORS.find(c=>c.name===colorName)||randomFrom(TILE_COLORS);const p=randomPosition(Math.min(arenaSize,660));tiles.push({x:p.x,y:p.y,size:35,color:colorObj.name,fill:colorObj.fill,lockedBy:null,safe:colorObj.name===safeTileColor});}
- // Make sure the target colour has fewer tiles than the number of living fighters.
  setState('TILE_SURVIVAL',6);addKillMessage(`STAND ON THE ${safeTileColor} TILE TO SURVIVE`);}
 function moveBotToTile(ent,dt){if(ent.tileSafe)return;const tile=tiles.filter(t=>t.safe&&!t.lockedBy);let targetTile=tile.sort((a,b)=>Math.hypot(a.x-ent.x,a.y-ent.y)-Math.hypot(b.x-ent.x,b.y-ent.y))[0];if(!targetTile){updateBot(ent,dt,'TILE_SURVIVAL');return;}const a=Math.atan2(targetTile.y-ent.y,targetTile.x-ent.x),d=Math.hypot(targetTile.x-ent.x,targetTile.y-ent.y);if(d>7){ent.x+=Math.cos(a)*ent.speed*1.15*dt;ent.y+=Math.sin(a)*ent.speed*1.15*dt;ent.moveAnim+=dt*11;ent.angle=a;}keepInArena(ent);}
 function processTileLocks(){for(const tile of tiles){if(!tile.safe||tile.lockedBy)continue;const candidate=aliveEntities().filter(e=>!e.tileSafe&&Math.hypot(e.x-tile.x,e.y-tile.y)<tile.size*.62+e.radius).sort((a,b)=>Math.hypot(a.x-tile.x,a.y-tile.y)-Math.hypot(b.x-tile.x,b.y-tile.y))[0];if(candidate){tile.lockedBy=candidate.id;candidate.tileSafe=true;addKillMessage(`${candidate.name} LOCKED A SAFE TILE`);}}}
 function resolveTileRound(){const alive=aliveEntities();const survivors=alive.filter(e=>e.tileSafe);const survivorIds=new Set(survivors.map(e=>e.id));for(const e of alive){if(!survivorIds.has(e.id)){e.alive=false;addKillMessage(`${e.name} DID NOT REACH THE ${safeTileColor} TILE`);}}const localEnt=entities.find(e=>e.id===localPlayerId);if(localEnt&&!localEnt.alive&&survivors.length>1)showDeathOverlay();if(survivors.length===0){finishMatch(null);$('resultTitle').textContent='NO ONE SURVIVED';$('resultMessage').textContent='Nobody reached a safe colour tile. It is a tie!';return;}if(survivors.length===1){finishMatch(survivors[0]);return;}if(survivors.length===2){startFastFinger();return;}roundNumber++;arenaSize=Math.max(400,arenaSize-25);beginTileRound();}
 function handleLowPlayerCount(){const alive=aliveEntities();if(alive.length===0)finishMatch(null);else if(alive.length===1)finishMatch(alive[0]);else if(alive.length===2)startFastFinger();else beginRound();}
 
-// -------------------- Multiplayer snapshots --------------------
 function serializableSnapshot(forceStarted=false){return{type:'snapshot',started:currentScreen==='game'||forceStarted,mode,roomCode,hostId:hostPlayerId,localPlayerId,gameState,stateTimer,roundNumber,arenaSize,gameElapsed,entities:entities.map(e=>({...e})),pendingHits:pendingHits.map(h=>({...h})),shots:shots.map(s=>({...s})),fireProgress,scoutPerk:scoutPerk?{...scoutPerk}:null,tiles:tiles.map(t=>({...t})),safeTileColor,winnerId,winnerName,fastShooterId,fastLoserId};}
 function broadcastSnapshot(force=false){if(!isRoomHost||!isAuthority)return;const snap=serializableSnapshot(force);for(const c of remoteConnections.values()){if(c.open&&c._playerId){try{c.send(snap);}catch(err){console.warn('Snapshot send failed',err);}}}}
 let clientPrevAlive=null;
@@ -352,7 +332,6 @@ function handleClientTap(){if(!isNetworkClient||!hostConn||!hostConn.open)return
 function renderResultOverlay(){const winner=entities.find(e=>e.id===winnerId);const local=entities.find(e=>e.id===localPlayerId);const localWon=winner&&winner.id===localPlayerId;setOverlayVisible(resultOverlay,true);setOverlayVisible(deathOverlay,false);$('resultTitle').textContent=winner?(localWon?'CONGRATULATIONS!':`${winner.name} WINS!`):'NO ONE SURVIVED';$('resultMessage').textContent=winner?(localWon?'You survived the arena. Fantastic shot!':`${winner.name} won the match. Better luck next time!`):'It was a draw. No fighter survived the final challenge.';$('resultWinner').textContent=winner?winner.name:'TIE';$('resultKills').textContent=local?local.kills:0;$('resultExtra').textContent=localWon?'🏆 Champion! Your victory fireworks are live.':'Thanks for watching Blind Shot!';if(localWon)addFireworks();gameResultShown=true;}
 function showDeathOverlay(){if(localDeathSeen||isSpectating||gameState==='GAME_OVER')return;localDeathSeen=true;const local=entities.find(e=>e.id===localPlayerId);$('deathKills').textContent=local?local.kills:0;$('deathRound').textContent=roundNumber;$('deathMessage').textContent=`${local?.name||'You'} were eliminated. The match continues — spectate to watch the survivors.`;setOverlayVisible(deathOverlay,true);}
 
-// -------------------- Drawing --------------------
 function drawCartoonText(text,x,y,size=24,color='#fff'){ctx.save();ctx.font=`${size}px 'Luckiest Guy',cursive`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineWidth=Math.max(3,size*.13);ctx.strokeStyle='#081411';ctx.strokeText(text,x,y);ctx.fillStyle=color;ctx.fillText(text,x,y);ctx.restore();}
 function drawEntity(ent,showLabel){ctx.save();ctx.translate(ent.x,ent.y);ctx.rotate(ent.angle);const swing=(gameState==='STARTING'||gameState==='AIMING'||gameState==='TILE_SURVIVAL')?Math.sin(ent.moveAnim)*5:0;ctx.fillStyle='#111';ctx.fillRect(-10+swing,-9,7,8);ctx.fillRect(-10-swing,2,7,8);ctx.fillStyle=ent.color;ctx.fillRect(4,-15,10,9);ctx.fillRect(4,6,10,9);ctx.fillStyle='#fff';ctx.fillRect(9,-3,24,7);ctx.fillStyle=ent.color;ctx.fillRect(-ent.radius,-ent.radius,ent.radius*2,ent.radius*2);ctx.fillStyle='#fed7aa';ctx.fillRect(0,-5,13,10);ctx.restore();if(showLabel){ctx.save();ctx.font=`${ent.isLocal?18:16}px 'Luckiest Guy',cursive`;ctx.textAlign='center';ctx.lineWidth=4;ctx.strokeStyle='#000';ctx.strokeText(ent.name,ent.x,ent.y-29);ctx.fillStyle=ent.isLocal?'#d8fff1':'#fff';ctx.fillText(ent.name,ent.x,ent.y-29);if(ent.kills>0){ctx.font="11px 'Fredoka',sans-serif";ctx.lineWidth=3;ctx.strokeText(`K ${ent.kills}`,ent.x,ent.y-45);ctx.fillText(`K ${ent.kills}`,ent.x,ent.y-45);}ctx.restore();}}
 function drawArena(){ctx.clearRect(0,0,800,800);const cx=400,cy=400,r=arenaSize/2;ctx.save();ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.clip();const x0=400-r,y0=400-r,tile=50;for(let rr=0;rr<=arenaSize/tile+1;rr++)for(let cc=0;cc<=arenaSize/tile+1;cc++){ctx.fillStyle=(rr+cc)%2===0?'#1b3a36':'#102825';ctx.fillRect(x0+cc*tile,y0+rr*tile,tile,tile);}if(gameState==='TILE_SURVIVAL'){for(const t of tiles){ctx.save();ctx.translate(t.x,t.y);ctx.fillStyle=t.fill;ctx.strokeStyle=t.lockedBy?'#fff':'#071714';ctx.lineWidth=t.lockedBy?5:3;ctx.shadowColor=t.safe?t.fill:'transparent';ctx.shadowBlur=t.safe?14:0;ctx.fillRect(-t.size/2,-t.size/2,t.size,t.size);ctx.strokeRect(-t.size/2,-t.size/2,t.size,t.size);if(t.lockedBy){ctx.fillStyle='#101714';ctx.font="14px 'Luckiest Guy',cursive";ctx.textAlign='center';ctx.fillText('✓',0,5);}ctx.restore();}}
@@ -383,11 +362,9 @@ function draw(){if(currentScreen!=='game')return;drawArena();const local=entitie
  else if(gameState==='GAME_OVER'){drawCartoonText(winnerId?(winnerId===localPlayerId?'YOU WIN!':`${winnerName} WINS!`):'NO ONE SURVIVED',400,400,34,'#38d9a9');}
 }
 
-// -------------------- Main loop --------------------
 function frame(now){const dt=Math.min(.05,Math.max(0,(now-lastFrame)/1000));lastFrame=now;try{drawBackground(dt);drawFireworks(dt);updateHitBlasts(dt);if(currentScreen==='game'){if(isAuthority)tickAuthority(dt);else if(isNetworkClient&&gameState!=='GAME_OVER'){if(stateTimer>0)stateTimer=Math.max(0,stateTimer-dt);if(gameState==='FIRING')fireProgress=Math.min(1,fireProgress+dt/.42);}if(isNetworkClient){inputElapsed+=dt;if(inputElapsed>=.05){inputElapsed=0;sendClientInput();}}if(isRoomHost){snapshotElapsed+=dt;if(snapshotElapsed>=.09){snapshotElapsed=0;broadcastSnapshot();}}draw();}}catch(err){console.error('Blind Shot frame recovered from an error:',err);}finally{requestAnimationFrame(frame);}}
 function sendClientInput(){if(!hostConn||!hostConn.open||!isNetworkClient||gameState==='GAME_OVER')return;const i=getLocalInput();try{hostConn.send({type:'input',moveX:i.moveX,moveY:i.moveY,angle:i.angle});}catch(_){} }
 
-// Owner-controlled maintenance and centred construction notice.
 (function initOwnerSettings(){
  const maintenance=$('maintenanceScreen');
  if(MAINTENANCE_MODE){maintenance.classList.add('active');document.querySelectorAll('button').forEach(b=>{if(!maintenance.contains(b))b.disabled=true;});}
@@ -407,17 +384,12 @@ function sendClientInput(){if(!hostConn||!hostConn.open||!isNetworkClient||gameS
 })();
 requestAnimationFrame(frame);
 
-// -------------------- Button behavior --------------------
 showdownBtn.addEventListener('click',e=>{e.preventDefault();if(gameState!=='FAST_READY')return;if(isNetworkClient){handleClientTap();return;}const local=entities.find(e=>e.id===localPlayerId);if(local)resolveFastTap(local);});
 showdownBtn.addEventListener('touchstart',e=>{if(gameState==='FAST_READY'){e.preventDefault();if(isNetworkClient)handleClientTap();else{const local=entities.find(p=>p.id===localPlayerId);if(local)resolveFastTap(local);}}},{passive:false});
 
-// Allow taps on actual button only when it is green; avoids double taps from click + touchstart.
 let touchFastHandled=false;
 showdownBtn.addEventListener('touchstart',()=>{touchFastHandled=true;setTimeout(()=>touchFastHandled=false,450)},{passive:true});
 showdownBtn.addEventListener('click',e=>{if(touchFastHandled){e.preventDefault();return;}},true);
 
-// -------------------- Cleanup / tab lifecycle --------------------
 window.addEventListener('beforeunload',()=>{try{destroyPeer(true);}catch(_){}});
-document.addEventListener('visibilitychange',()=>{if(document.hidden&&currentScreen==='game'&&isAuthority){/* game remains authoritative; timer uses capped delta on resume */}});
-
-// Small guard: if PeerJS host disconnects, let everyone return to the menu.
+document.addEventListener('visibilitychange',()=>{if(document.hidden&&currentScreen==='game'&&isAuthority){}});
