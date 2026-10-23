@@ -15,7 +15,7 @@ const PERMANENTLY_DISABLE_CONSTRUCTION_NOTICE = false;
 const UNDER_CONSTRUCTION_NOTICE_DURATION_MS = 5000;
 const CONTACT_EMAIL = 'riyanshusinh@gmail.com';
 const INSTAGRAM_URL = 'https://www.instagram.com/riyanshu_1233/';
-const OTHER_GAMES_URL = 'NULL';
+const OTHER_GAMES_URL = 'https://arcade-edition.onrender.com/';
 
 
 let bgW=0,bgH=0; const bgParticles=[]; const bgShapes=['O','X','•','✦'];
