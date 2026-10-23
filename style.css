@@ -9,6 +9,7 @@
 @media(max-width:620px){.menu-shell{padding:24px 17px 18px}.hamburger{width:43px;height:43px;right:10px;top:10px}.roster{grid-template-columns:1fr}.lobby-card{padding:17px}.lobby-heading{flex-direction:column}.room-code{align-self:stretch}.game-center{width:min(94vh,66vw);max-width:calc(100vw - 90px)}.game-topbar{top:4px;left:3px;right:3px}.hud-pill{font-size:12px;padding:6px 8px}.icon-btn{width:36px;height:36px;border-radius:11px;font-size:21px}.kill-feed{top:44px}.cartoon-btn{font-size:16px;padding:10px 13px}}
 @media(orientation:landscape) and (max-height:520px){#gameScreen{padding-top:28px}.game-center{width:min(90vh,70vw);max-width:calc(100vw - 90px)}.game-topbar{top:2px}.hud-pill{font-size:12px;padding:5px 7px}.icon-btn{width:33px;height:33px}.overlay-card{padding:15px}.overlay-card h2{font-size:25px}.overlay-card p{font-size:13px;margin:5px 0 8px}.overlay-stats{margin:8px auto 10px}.overlay-actions{gap:7px}}
 
+/* Blind Shot menu refresh */
 .menu-shell{width:min(100%,430px);padding:12px 24px 24px;border:0;background:transparent;box-shadow:none;border-radius:0;}
 .duck-hero{display:block;width:145px;height:158px;margin:0 auto -2px;filter:drop-shadow(0 8px 0 #071411);}
 .logo{font-family:'Luckiest Guy',Impact,'Arial Black',sans-serif;font-size:clamp(42px,11vw,62px);letter-spacing:1.3px;margin:0;text-transform:uppercase;}
@@ -34,6 +35,7 @@
 .roster-item{border-radius:14px;}
 @media(max-width:620px){.menu-shell{padding:24px 16px 22px}.duck-hero{width:132px;height:145px}.menu-btn{min-height:59px;font-size:21px}.section-card{padding:22px 17px}.lobby-card{padding:17px}}
 @media(max-height:700px) and (orientation:portrait){#menuScreen{align-items:flex-start}.menu-shell{padding-top:52px}.duck-hero{width:92px;height:101px}.logo{font-size:40px}.tagline{margin:6px 0 14px}.menu-buttons{gap:9px}.menu-btn{min-height:50px;padding:9px 15px}}
+
 
 #gameScreen{gap:8px;padding:24px 8px 7px;}
 #gameScreen .side-zone{flex:1 1 0;min-width:100px;height:100%;position:relative;overflow:visible;}
@@ -67,7 +69,6 @@
  .side-panel-heading{font-size:11px;}
 }
 
-/* Smooth screen, section and notice transitions */
 .screen{opacity:0;transition:opacity .24s ease;pointer-events:none}
 .screen.active{display:flex;opacity:1;pointer-events:auto;animation:screenFadeIn .28s ease both}
 .screen.leaving{display:flex;opacity:0;pointer-events:none}
@@ -104,17 +105,4 @@
 .overlay-card{opacity:0;transform:translate(-50%,-47%) scale(.985);transition:opacity .24s ease,transform .24s ease;}
 .overlay-card.shown{opacity:1;transform:translate(-50%,-50%) scale(1);}
 .overlay-card.closing{opacity:0;transform:translate(-50%,-47%) scale(.985);pointer-events:none;}
-.rotate-overlay{display:flex;visibility:hidden;opacity:0;pointer-events:none;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transition:opacity .26s ease,visibility .26s ease;}
-.rotate-overlay.active{display:flex;visibility:visible;opacity:1;pointer-events:auto;}
-.toast{display:block;visibility:hidden;opacity:0;transform:translate(-50%,8px);transition:opacity .2s ease,transform .2s ease,visibility .2s ease;}
-.toast.active{display:block;visibility:visible;opacity:1;transform:translate(-50%,0);}
-
-.construction-backdrop{position:fixed;inset:0;z-index:13000;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(2,18,15,.53);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);opacity:0;visibility:hidden;pointer-events:none;transition:opacity .35s ease,visibility .35s ease;}
-.construction-backdrop.active{opacity:1;visibility:visible;pointer-events:auto;}
-.construction-backdrop.closing{opacity:0;visibility:visible;pointer-events:none;}
-#constructionNotice{position:relative;top:auto;left:auto;z-index:auto;transform:translateY(8px) scale(.98);width:min(92vw,430px);padding:25px 54px 25px 22px;border:4px solid #151513;border-radius:22px;background:#fff5e6;color:#111916;box-shadow:0 7px 0 #151513,0 24px 70px #0008;text-align:center;opacity:0;pointer-events:auto;transition:opacity .28s ease,transform .28s ease;font-family:'Luckiest Guy',cursive;font-size:clamp(21px,5vw,28px);letter-spacing:.4px;}
-.construction-backdrop.active #constructionNotice{opacity:1;transform:translateY(0) scale(1);animation:panelFadeIn .3s ease both;}
-.construction-backdrop.closing #constructionNotice{opacity:0;transform:translateY(8px) scale(.98);}
-#constructionNotice button{position:absolute;right:9px;top:9px;width:34px;height:34px;border:3px solid #111916;border-radius:50%;background:#38d9a9;color:#111916;font-family:'Fredoka',sans-serif;font-size:24px;line-height:1;display:grid;place-items:center;}
-#maintenanceScreen{backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);}
-@media(prefers-reduced-motion:reduce){.screen,.menu-panel,.modal-backdrop,.modal,.overlay-card,.rotate-overlay,.toast,.construction-backdrop,#constructionNotice{transition:none!important;animation:none!important}}
+.rotate-overlay{display:flex;visibility:hidden;opacity:0;pointer-events:none;backdrop
