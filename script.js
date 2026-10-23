@@ -9,7 +9,7 @@ const killFeed=$('killFeed'), shotRevealPanel=$('shotRevealPanel'), shotRevealLi
 const deathOverlay=$('deathOverlay'), resultOverlay=$('resultOverlay'), toastEl=$('toast');
 const onlinePanel=$('onlinePanel'), hostPanel=$('hostPanel'), joinPanel=$('joinPanel');
 const mobileDevice = (matchMedia('(pointer: coarse)').matches || navigator.maxTouchPoints>0);
-const MAINTENANCE_MODE = true; 
+const MAINTENANCE_MODE = false; 
 const SHOW_UNDER_CONSTRUCTION_NOTICE = true;
 const PERMANENTLY_DISABLE_CONSTRUCTION_NOTICE = false;
 const UNDER_CONSTRUCTION_NOTICE_DURATION_MS = 5000;
