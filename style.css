@@ -9,7 +9,6 @@
 @media(max-width:620px){.menu-shell{padding:24px 17px 18px}.hamburger{width:43px;height:43px;right:10px;top:10px}.roster{grid-template-columns:1fr}.lobby-card{padding:17px}.lobby-heading{flex-direction:column}.room-code{align-self:stretch}.game-center{width:min(94vh,66vw);max-width:calc(100vw - 90px)}.game-topbar{top:4px;left:3px;right:3px}.hud-pill{font-size:12px;padding:6px 8px}.icon-btn{width:36px;height:36px;border-radius:11px;font-size:21px}.kill-feed{top:44px}.cartoon-btn{font-size:16px;padding:10px 13px}}
 @media(orientation:landscape) and (max-height:520px){#gameScreen{padding-top:28px}.game-center{width:min(90vh,70vw);max-width:calc(100vw - 90px)}.game-topbar{top:2px}.hud-pill{font-size:12px;padding:5px 7px}.icon-btn{width:33px;height:33px}.overlay-card{padding:15px}.overlay-card h2{font-size:25px}.overlay-card p{font-size:13px;margin:5px 0 8px}.overlay-stats{margin:8px auto 10px}.overlay-actions{gap:7px}}
 
-/* Blind Shot menu refresh */
 .menu-shell{width:min(100%,430px);padding:12px 24px 24px;border:0;background:transparent;box-shadow:none;border-radius:0;}
 .duck-hero{display:block;width:145px;height:158px;margin:0 auto -2px;filter:drop-shadow(0 8px 0 #071411);}
 .logo{font-family:'Luckiest Guy',Impact,'Arial Black',sans-serif;font-size:clamp(42px,11vw,62px);letter-spacing:1.3px;margin:0;text-transform:uppercase;}
@@ -105,4 +104,52 @@
 .overlay-card{opacity:0;transform:translate(-50%,-47%) scale(.985);transition:opacity .24s ease,transform .24s ease;}
 .overlay-card.shown{opacity:1;transform:translate(-50%,-50%) scale(1);}
 .overlay-card.closing{opacity:0;transform:translate(-50%,-47%) scale(.985);pointer-events:none;}
-.rotate-overlay{display:flex;visibility:hidden;opacity:0;pointer-events:none;backdrop
+.rotate-overlay{display:flex;visibility:hidden;opacity:0;pointer-events:none;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transition:opacity .26s ease,visibility .26s ease;}
+.rotate-overlay.active{display:flex;visibility:visible;opacity:1;pointer-events:auto;}
+.toast{display:block;visibility:hidden;opacity:0;transform:translate(-50%,8px);transition:opacity .2s ease,transform .2s ease,visibility .2s ease;}
+.toast.active{display:block;visibility:visible;opacity:1;transform:translate(-50%,0);}
+
+.construction-backdrop{position:fixed;inset:0;z-index:13000;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(2,18,15,.53);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);opacity:0;visibility:hidden;pointer-events:none;transition:opacity .35s ease,visibility .35s ease;}
+.construction-backdrop.active{opacity:1;visibility:visible;pointer-events:auto;}
+.construction-backdrop.closing{opacity:0;visibility:visible;pointer-events:none;}
+#constructionNotice{position:relative;top:auto;left:auto;z-index:auto;transform:translateY(8px) scale(.98);width:min(92vw,430px);padding:25px 54px 25px 22px;border:4px solid #151513;border-radius:22px;background:#fff5e6;color:#111916;box-shadow:0 7px 0 #151513,0 24px 70px #0008;text-align:center;opacity:0;pointer-events:auto;transition:opacity .28s ease,transform .28s ease;font-family:'Luckiest Guy',cursive;font-size:clamp(21px,5vw,28px);letter-spacing:.4px;}
+.construction-backdrop.active #constructionNotice{opacity:1;transform:translateY(0) scale(1);animation:panelFadeIn .3s ease both;}
+.construction-backdrop.closing #constructionNotice{opacity:0;transform:translateY(8px) scale(.98);}
+#constructionNotice button{position:absolute;right:9px;top:9px;width:34px;height:34px;border:3px solid #111916;border-radius:50%;background:#38d9a9;color:#111916;font-family:'Fredoka',sans-serif;font-size:24px;line-height:1;display:grid;place-items:center;}
+#maintenanceScreen{backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);}
+@media(prefers-reduced-motion:reduce){.screen,.menu-panel,.modal-backdrop,.modal,.overlay-card,.rotate-overlay,.toast,.construction-backdrop,#constructionNotice{transition:none!important;animation:none!important}}
+
+#menuScreen{position:fixed;inset:0;align-items:center;justify-content:center;overflow:hidden!important;overscroll-behavior:none;padding:clamp(48px,7vh,70px) 14px clamp(42px,7vh,58px)!important;}
+#menuScreen .menu-shell{width:min(100%,430px);max-height:100%;overflow:hidden;margin:0 auto!important;padding:clamp(8px,2vh,18px) 20px 10px!important;}
+#menuScreen .duck-hero{width:clamp(72px,15vh,125px)!important;height:auto!important;max-height:clamp(76px,17vh,135px)!important;display:block;margin:0 auto 2px;}
+#menuScreen .logo{font-size:clamp(34px,7.5vh,52px)!important;margin:3px 0;}
+#menuScreen .tagline{font-size:clamp(10px,1.8vh,13px)!important;margin:5px 0 12px!important;}
+#menuScreen .menu-buttons{gap:clamp(6px,1.25vh,10px)!important;}
+#menuScreen .menu-btn{min-height:clamp(39px,7.4vh,51px)!important;padding:7px 12px!important;font-size:clamp(16px,2.8vh,20px)!important;border-radius:15px;}
+#creatorFooter{position:fixed;z-index:15;left:0;right:0;bottom:max(8px,env(safe-area-inset-bottom));text-align:center;color:#a8cfc4;font:500 12px/1.2 'Fredoka',sans-serif;letter-spacing:.4px;text-shadow:0 2px 5px #000;pointer-events:none;}
+#creatorFooter strong{color:var(--mint);font-weight:700;}
+#menuScreen.active{animation:menuFadeIn .32s ease both;}
+#menuScreen.leaving{animation:menuFadeOut .24s ease both;}
+@keyframes menuFadeIn{from{opacity:0}to{opacity:1}}
+@keyframes menuFadeOut{from{opacity:1}to{opacity:0}}
+#hamburgerBtn{transition:transform .2s ease,opacity .2s ease;}
+#hamburgerBtn:active{transform:scale(.92);}
+.modal-backdrop{transition:opacity .24s ease,visibility .24s ease;}
+.modal-backdrop.active .modal{animation:menuPanelIn .26s ease both;}
+.modal-backdrop.closing .modal{animation:menuPanelOut .2s ease both;}
+@keyframes menuPanelIn{from{opacity:0;transform:translateY(10px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes menuPanelOut{from{opacity:1;transform:translateY(0) scale(1)}to{opacity:0;transform:translateY(8px) scale(.98)}}
+#maintenanceScreen{z-index:14000;overflow:auto;}
+#maintenanceScreen .maintenance-card{width:min(100%,420px);padding:clamp(22px,5vh,34px);border:3px solid var(--gold);border-radius:26px;background:linear-gradient(155deg,#104038,#08231f);box-shadow:0 20px 70px #0009;animation:menuPanelIn .35s ease both;}
+#maintenanceScreen .maintenance-duck{font-size:54px;margin-bottom:4px;animation:maintenanceBob 2s ease-in-out infinite;}
+#maintenanceScreen .maintenance-card h1{font-family:'Luckiest Guy',cursive;color:var(--gold);font-size:clamp(34px,8vw,48px);margin:0 0 8px;}
+#maintenanceScreen .maintenance-card h2{font-family:'Luckiest Guy',cursive;color:var(--mint);font-size:clamp(20px,5vw,27px);margin:0 0 12px;}
+#maintenanceScreen .maintenance-card p{color:#d7e9e4;line-height:1.5;margin:0 0 20px;}
+#maintenanceScreen .maintenance-card button{width:100%;}
+#maintenanceScreen .maintenance-card .maintenance-small{font-size:12px;color:#9fc7bb;margin:16px 0 0;}
+@keyframes maintenanceBob{50%{transform:translateY(-5px) rotate(-4deg)}}
+@media(max-height:620px){#menuScreen{padding-top:42px!important;padding-bottom:34px!important}#menuScreen .duck-hero{width:62px!important;max-height:66px!important}#menuScreen .tagline{margin:3px 0 7px!important}#menuScreen .menu-buttons{gap:5px!important}#menuScreen .menu-btn{min-height:34px!important;padding:5px 10px!important;font-size:15px!important}#menuScreen .menu-shell{padding-top:3px!important}}
+@media(max-width:380px){#menuScreen .menu-shell{padding-left:12px!important;padding-right:12px!important}#creatorFooter{font-size:11px}}
+@media(prefers-reduced-motion:reduce){#menuScreen.active,#menuScreen.leaving,#maintenanceScreen .maintenance-card,#maintenanceScreen .maintenance-duck,.modal-backdrop.active .modal,.modal-backdrop.closing .modal{animation:none!important;transition:none!important}}
+.screen.active:not(#menuScreen){animation:none!important;}
+.screen.leaving:not(#menuScreen){animation:none!important;}
